@@ -1,0 +1,33 @@
+name: LinkedIn reminders
+
+# 6 PM ET = 22:00 UTC (EDT) / 23:00 UTC (EST). The script only acts at 18:00 ET on the evening before a
+# Tue/Thu slot; the token-expiry check runs every evening.
+on:
+  schedule:
+    - cron: "0 22,23 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  remind:
+    # does nothing until authorize.py has run (it sets this variable), so forks stay quiet
+    if: vars.LINKEDIN_TOKEN_EXPIRES_AT != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check
+        env:
+          LINKEDIN_TOKEN_EXPIRES_AT: ${{ vars.LINKEDIN_TOKEN_EXPIRES_AT }}
+          ISSUES_FILE: ${{ runner.temp }}/issues.tsv
+        run: python3 automation/linkedin/reminders.py
+      - name: Open issues
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUES_FILE: ${{ runner.temp }}/issues.tsv
+        run: bash automation/linkedin/open_issues.sh

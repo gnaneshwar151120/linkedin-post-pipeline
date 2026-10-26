@@ -1,0 +1,52 @@
+name: LinkedIn publish
+
+# Tue + Thu. 9:00 ET is 13:00 UTC (EDT) or 14:00 UTC (EST); runs every 30 min across both so the
+# script (which works in ET) catches the slot and retries once on failure.
+on:
+  schedule:
+    - cron: "0,30 13,14,15 * * 2,4"
+  workflow_dispatch:
+
+concurrency:
+  group: post-writes
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  publish:
+    # does nothing until authorize.py has run (it sets this variable), so forks stay quiet
+    if: vars.LINKEDIN_TOKEN_EXPIRES_AT != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Publish due posts
+        env:
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
+          LINKEDIN_API_VERSION: ${{ vars.LINKEDIN_API_VERSION || '202609' }}
+          ISSUES_FILE: ${{ runner.temp }}/issues.tsv
+        run: python3 automation/linkedin/publish.py
+      - name: Open issues
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUES_FILE: ${{ runner.temp }}/issues.tsv
+        run: bash automation/linkedin/open_issues.sh
+      - name: Commit changes
+        if: always()
+        run: |
+          git config user.name "post-bot"
+          git config user.email "post-bot@users.noreply.github.com"
+          git add -A posts
+          git diff --cached --quiet && exit 0
+          git commit -m "LinkedIn: publish run $(date -u +%Y-%m-%dT%H:%MZ)"
+          git pull --rebase
+          git push

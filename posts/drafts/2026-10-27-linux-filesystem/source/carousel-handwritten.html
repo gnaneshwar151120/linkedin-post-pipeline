@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Filesystem Carousel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+  :root { --paper: #fffdf6; --rule: #d6e4f5; --margin: #f2a3a3; --ink: #1f2a44; --soft: #4a5470;
+          --blue: #2456c8; --red: #c8302f; --green: #1d7a46; --purple: #6b3fb8; --orange: #d0661a; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #ccc; display: flex; flex-direction: column; gap: 30px; padding: 30px; }
+  .page {
+    width: 1080px; height: 1350px; padding: 56px 60px 50px 120px; position: relative; overflow: hidden; color: var(--ink);
+    font-family: "Patrick Hand", cursive; font-size: 38px; line-height: 1.3;
+    background:
+      linear-gradient(90deg, transparent 88px, var(--margin) 88px, var(--margin) 91px, transparent 91px),
+      repeating-linear-gradient(var(--paper) 0 51px, var(--rule) 51px 52px);
+  }
+  .count { position: absolute; top: 34px; right: 50px; font-family: "Caveat"; font-size: 40px; color: var(--soft); }
+  .kicker { font-family: "Caveat"; font-size: 40px; color: var(--soft); transform: rotate(-1deg); }
+  h1 { font-family: "Caveat", cursive; font-weight: 700; font-size: 104px; line-height: .95; transform: rotate(-1.5deg); margin: 4px 0 18px; }
+  h2 { font-family: "Caveat", cursive; font-weight: 700; font-size: 74px; line-height: 1; margin: 18px 0 8px; transform: rotate(-1deg); }
+  h2 .u { background: linear-gradient(transparent 60%, #ffe36e 60% 92%, transparent 92%); padding: 0 6px; }
+  .blue { color: var(--blue); } .red { color: var(--red); } .green { color: var(--green); } .purple { color: var(--purple); } .orange { color: var(--orange); }
+  .c { color: var(--blue); }
+  .hl { background: linear-gradient(transparent 55%, #ffe36e 55% 92%, transparent 92%); }
+  .pink { background: linear-gradient(transparent 55%, #ffc2d4 55% 92%, transparent 92%); }
+  .mint { background: linear-gradient(transparent 55%, #bff0c8 55% 92%, transparent 92%); }
+  .row { display: grid; grid-template-columns: 220px 1fr; column-gap: 20px; }
+  .row.wide { grid-template-columns: 300px 1fr; }
+  .arrow { font-family: "Caveat"; font-size: 42px; color: var(--soft); }
+  .note { font-family: "Caveat"; font-size: 46px; }
+  .warn { color: var(--red); }
+  .circle { display: inline-block; border: 3px solid var(--red); border-radius: 50% 45% 55% 48%; padding: 0 14px; transform: rotate(-2deg); }
+  .sticky { position: absolute; background: #fff27a; padding: 14px 22px; font-family: "Caveat"; font-size: 44px; line-height: 1.1; box-shadow: 3px 4px 0 rgba(0,0,0,.15); }
+  .swipe { position: absolute; bottom: 40px; right: 56px; font-family: "Caveat"; font-size: 46px; color: var(--soft); }
+  .penguin { position: absolute; font-size: 110px; }
+  /* tree */
+  .tree { font-family: "Patrick Hand"; font-size: 40px; line-height: 1.28; margin-left: 10px; }
+  .tree .root { font-family: "Caveat"; font-weight: 700; font-size: 84px; color: var(--red); line-height: 1; }
+  .tree .b { color: var(--soft); }
+  .tree .d { color: var(--blue); display: inline-block; width: 190px; }
+  .ls { font-size: 58px; letter-spacing: 2px; margin: 6px 0 2px; }
+  .ls .t { color: var(--orange); } .ls .u { color: var(--green); } .ls .g { color: var(--blue); } .ls .o { color: var(--red); }
+  .brace { font-family: "Caveat"; font-size: 40px; color: var(--soft); display: flex; gap: 0; margin-left: 4px; }
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; }
+  .big { font-size: 48px; }
+  #p2, #p3 { font-size: 44px; line-height: 1.34; } #p2 h2, #p3 h2 { margin-top: 30px; }
+  .footer { position: absolute; left: 120px; right: 60px; bottom: 120px; font-family: "Caveat"; font-size: 54px; text-align: center; transform: rotate(-1deg); }
+  .footer span { border: 4px solid var(--ink); border-radius: 22px 14px 24px 16px; padding: 8px 26px; background: #fff7c2; display: inline-block; }
+</style>
+</head>
+<body>
+
+<!-- 1/4: tree + paths -->
+<section class="page" id="p1">
+  <div class="count">1 / 4</div>
+  <div class="kicker">my Linux notes · AlmaLinux</div>
+  <h1>Moving Around<br>the <span class="hl">Filesystem</span></h1>
+  <div class="penguin" style="right:60px; top:150px; transform:rotate(10deg)">🐧</div>
+
+  <h2><span class="u">one tree</span> <span class="arrow">everything hangs off the root</span></h2>
+  <div class="tree">
+    <div class="root">/</div>
+    <div><span class="b">├─ </span><span class="d">/etc</span>config files</div>
+    <div><span class="b">├─ </span><span class="d">/home</span>users' homes</div>
+    <div><span class="b">├─ </span><span class="d">/root</span>root's home <span class="arrow">(not in /home!)</span></div>
+    <div><span class="b">├─ </span><span class="d">/var</span>logs, web root</div>
+    <div><span class="b">├─ </span><span class="d">/usr</span>programs + libraries</div>
+    <div><span class="b">└─ </span><span class="d">/dev</span>disks, terminals</div>
+  </div>
+  <div class="note green" style="margin-top:6px">no C:\ drive. a new disk is just another folder.</div>
+
+  <h2><span class="u">paths</span></h2>
+  <div class="row"><span class="c">/usr/share/doc</span><span></span></div>
+  <div class="arrow" style="margin:-6px 0 6px">↑ absolute: starts at /</div>
+  <div class="row"><span class="c">../etc</span><span class="arrow">← relative: from where I am</span></div>
+  <div style="margin-top:10px"><span class="c">~</span> home · <span class="c">.</span> here · <span class="c">..</span> up · <span class="c">cd -</span> jump back</div>
+
+  <div class="swipe">swipe →</div>
+</section>
+
+<!-- 2/4: globs + braces + redirection -->
+<section class="page" id="p2">
+  <div class="count">2 / 4</div>
+  <h2 style="margin-top:20px"><span class="u">wildcards</span> <span class="arrow">match files that exist</span></h2>
+  <div class="row"><span class="c big">*</span><span>anything, even nothing</span></div>
+  <div class="row"><span class="c big">?</span><span>exactly one character</span></div>
+  <div class="row"><span class="c big">[a-g]</span><span>one char from a range</span></div>
+  <div style="margin-top:8px"><span class="c">ls house[15]</span> <span class="arrow">→ house1 house5</span></div>
+
+  <h2><span class="u">braces</span> <span class="arrow">make words, files or not</span></h2>
+  <div><span class="c">touch memo{1..3}</span></div>
+  <div class="arrow" style="margin-left:40px">→ memo1 memo2 memo3</div>
+  <div><span class="c">mv house{3,4} houses/</span></div>
+
+  <h2><span class="u">redirection</span></h2>
+  <div class="row"><span class="c big">&gt;</span><span>output to a file <span class="circle">overwrites!</span></span></div>
+  <div class="row"><span class="c big">&gt;&gt;</span><span>append to a file</span></div>
+  <div class="row"><span class="c big">2&gt;</span><span>errors only</span></div>
+  <div class="row"><span class="c big">&amp;&gt;</span><span>output + errors</span></div>
+  <div class="row"><span class="c big">&lt;</span><span>file as input</span></div>
+  <div style="margin-top:12px"><span class="c">ls /root 2&gt; /dev/null</span></div>
+  <div class="arrow">↑ hides "Permission denied"</div>
+
+  <div class="swipe">swipe →</div>
+</section>
+
+<!-- 3/4: permissions -->
+<section class="page" id="p3">
+  <div class="count">3 / 4</div>
+  <h2 style="margin-top:20px"><span class="u">reading ls -l</span></h2>
+  <div class="ls"><span class="t">-</span><span class="u">rwx</span><span class="g">r-x</span><span class="o">r-x</span> joe joe script.sh</div>
+  <div class="arrow"><span class="orange">type</span> · <span class="green">user</span> · <span class="blue">group</span> · <span class="red">everyone else</span></div>
+
+  <div class="split" style="margin-top:20px">
+    <div>
+      <h2 style="margin-top:0" class="blue">on a FILE</h2>
+      <div><b class="c">r</b> = read it</div>
+      <div><b class="c">w</b> = change it</div>
+      <div><b class="c">x</b> = run it</div>
+    </div>
+    <div>
+      <h2 style="margin-top:0" class="red">on a DIR</h2>
+      <div><b class="c">r</b> = list names</div>
+      <div><b class="c">w</b> = add / delete</div>
+      <div><b class="c">x</b> = enter (cd)</div>
+    </div>
+  </div>
+
+  <div class="note warn" style="margin-top:22px; font-size:52px; line-height:1.15">deleting a file needs the <span class="pink">folder's</span> w + x,<br>not the file's own w!</div>
+
+  <h2><span class="u">the numbers</span> <span class="arrow">r=4 w=2 x=1, add them up</span></h2>
+  <div class="row"><span class="c big">755</span><span>rwxr-xr-x <span class="arrow">scripts, dirs</span></span></div>
+  <div class="row"><span class="c big">644</span><span>rw-r--r-- <span class="arrow">normal files</span></span></div>
+  <div class="row"><span class="c big">640</span><span>rw-r----- <span class="arrow">configs w/ secrets</span></span></div>
+  <div style="margin-top:8px"><span class="c">chmod u+x script.sh</span> · <span class="c">chown joe:joe f</span></div>
+  <div class="note green" style="margin-top:18px">NGINX 403? check for x on every folder in the path.</div>
+
+  <div class="swipe">swipe →</div>
+</section>
+
+<!-- 4/4: umask + traps -->
+<section class="page" id="p4">
+  <div class="count">4 / 4</div>
+  <h2 style="margin-top:20px"><span class="u">umask</span> <span class="arrow">takes bits away from 666 / 777</span></h2>
+  <div class="row wide"><span class="c">umask 002</span><span>file <b>664</b> · dir 775</span></div>
+  <div class="row wide"><span class="c">umask 022</span><span>file 644 · dir 755</span></div>
+  <div class="note" style="margin-top:4px"><span class="red">easy to get wrong: 002 → 644?</span> it's <span class="hl">664</span>.</div>
+
+  <h2><span class="u">special bits</span></h2>
+  <div class="row wide"><span>rw<b class="red">s</b>r-xr-x</span><span class="arrow">setUID: runs as owner (passwd)</span></div>
+  <div class="row wide"><span>rwxrwxrw<b class="red">t</b></span><span class="arrow">sticky: delete only your own (/tmp)</span></div>
+
+  <h2 class="red">⚠ traps</h2>
+  <div><span class="c">chmod -R 644 dir</span></div>
+  <div class="arrow" style="margin-left:40px">→ strips x, nobody can cd in. use <span class="c">u=rwX,go=rX</span></div>
+  <div><span class="c">cp -r</span> vs <span class="c">cp -a</span></div>
+  <div class="arrow" style="margin-left:40px">→ only -a keeps owner, timestamps + exact modes</div>
+  <div><span class="c">rm -rf</span></div>
+  <div class="arrow" style="margin-left:40px">→ never asks. read the path twice.</div>
+
+  <div class="footer"><span>paths say <u>where</u> · globs say <u>which</u><br>permissions say <u>who can</u></span></div>
+  <div class="sticky" style="right:50px; bottom:30px; transform:rotate(5deg)">save this 📌</div>
+</section>
+
+</body>
+</html>
